@@ -1,0 +1,12 @@
+diff -Naur a/cmake/FindBIND.cmake b/cmake/FindBIND.cmake
+--- a/cmake/FindBIND.cmake	2015-06-07 01:05:51.005991885 -0700
++++ b/cmake/FindBIND.cmake	2015-06-07 01:05:24.826723636 -0700
+@@ -32,7 +32,7 @@
+     # on some systems, the ns_initparse symbol is not
+     # exported in the shared library (strangely)
+     # see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=291609
+-    set(bind_libs none libresolv.a resolv bind)
++    set(bind_libs none libresolv.a libbind.a resolv bind)
+ else ()
+     set(bind_libs none resolv bind)
+ endif ()
