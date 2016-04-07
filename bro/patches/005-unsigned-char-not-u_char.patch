@@ -1,0 +1,38 @@
+diff -ru bro-2.4.1/aux/binpac/lib/binpac_analyzer.h bro-2.4.1-mod/aux/binpac/lib/binpac_analyzer.h
+--- bro-2.4.1/aux/binpac/lib/binpac_analyzer.h	2015-09-06 15:43:19.000000000 -0400
++++ bro-2.4.1-mod/aux/binpac/lib/binpac_analyzer.h	2016-03-08 23:29:50.534730992 -0500
+@@ -10,16 +10,16 @@
+ public:
+ 	virtual ~ConnectionAnalyzer() {}
+ 	virtual void NewData(bool is_orig,
+-	                     const u_char *begin_of_data, 
+-	                     const u_char *end_of_data) = 0;
++	                     const unsigned char *begin_of_data, 
++	                     const unsigned char *end_of_data) = 0;
+ };
+ 
+ // The interface for a flow analyzer
+ class FlowAnalyzer {
+ public:
+ 	virtual ~FlowAnalyzer() {}
+-	virtual void NewData(const u_char *begin_of_data, 
+-	                     const u_char *end_of_data) = 0;
++	virtual void NewData(const unsigned char *begin_of_data, 
++	                     const unsigned char *end_of_data) = 0;
+ };
+ 
+ }  // namespace binpac
+Only in bro-2.4.1-mod/aux/binpac/lib: binpac_analyzer.h~
+diff -ru bro-2.4.1/aux/binpac/lib/binpac.h.in bro-2.4.1-mod/aux/binpac/lib/binpac.h.in
+--- bro-2.4.1/aux/binpac/lib/binpac.h.in	2015-09-06 15:43:19.000000000 -0400
++++ bro-2.4.1-mod/aux/binpac/lib/binpac.h.in	2016-03-08 23:31:24.776617872 -0500
+@@ -124,7 +124,7 @@
+ #define FixByteOrder(byteorder, x)	(byteorder == HOST_BYTEORDER ? (x) : pac_swap(x))
+ 
+ template <class T>
+-inline T UnMarshall(const u_char *data, int byteorder)
++inline T UnMarshall(const unsigned char *data, int byteorder)
+ 	{
+ 	T result = 0;
+ 	for ( int i = 0; i < (int) sizeof(T); ++i )
+Only in bro-2.4.1-mod/aux/binpac/lib: binpac.h.in~

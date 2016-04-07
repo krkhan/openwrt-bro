@@ -1,19 +1,21 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=bro
-PKG_VERSION:=2.3.1
+PKG_VERSION:=2.4.1
 PKG_RELEASE:=2
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/bro-$(PKG_VERSION)
 PKG_SOURCE:=bro-$(PKG_VERSION).tar.gz
 
 PKG_SOURCE_URL:=http://www.bro-ids.org/downloads/release/
-PKG_MD5SUM:=29a773ec6da4ee4f8ed86dfc26c60811
+PKG_MD5SUM:=353e79df458e2bbfa00bdbaa0f183908
 
 PKG_CAT:=zcat
 PKG_INSTALL:=1
 
-PKG_BUILD_DEPENDS:=bro/host
+PKG_BUILD_DEPENDS:=bro/host +USE_MUSL:musl-fts
+# broxygen uses fts.h; glibc has this but musl does not; musl-fts provides it
+PKG_DEPENDS:=+USE_MUSL:musl-fts
 HOST_BUILD_DEPENDS:=libpcap/host file/host zlib/host openssl/host bind/host
 HOST_BUILD_DIR:=$(BUILD_DIR_HOST)/bro-$(PKG_VERSION)
 

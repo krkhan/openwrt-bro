@@ -1,7 +1,7 @@
-diff -aur bro-2.3.1/aux/binpac/src/CMakeLists.txt bro-2.3.1-1/aux/binpac/src/CMakeLists.txt
---- bro-2.3.1/aux/binpac/src/CMakeLists.txt	2014-09-08 08:23:49.000000000 -0700
-+++ bro-2.3.1-1/aux/binpac/src/CMakeLists.txt	2014-09-19 18:17:27.939664681 -0700
-@@ -8,102 +8,107 @@
+diff -ru bro-2.4.1/aux/binpac/src/CMakeLists.txt bro-2.4.1-mod/aux/binpac/src/CMakeLists.txt
+--- bro-2.4.1/aux/binpac/src/CMakeLists.txt	2015-09-06 15:43:19.000000000 -0400
++++ bro-2.4.1-mod/aux/binpac/src/CMakeLists.txt	2016-03-08 22:51:04.303592562 -0500
+@@ -8,102 +8,109 @@
  include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                      ${CMAKE_CURRENT_BINARY_DIR})
  
@@ -93,6 +93,18 @@ diff -aur bro-2.3.1/aux/binpac/src/CMakeLists.txt bro-2.3.1-1/aux/binpac/src/CMa
 -    pac_varfield.h
 -    pac_withinput.h
 -)
+-
+-add_executable(binpac ${binpac_SRCS})
+-
+-if (NOT BinPAC_SKIP_INSTALL)
+-    install(TARGETS binpac DESTINATION bin)
+-endif ()
+-
+-# This is set to assist superprojects that want to build BinPac
+-# from source and rely on it as a target
+-set(BinPAC_EXE binpac
+-    CACHE STRING "BinPAC executable" FORCE)
++
 +if(NOT DEFINED BINPAC_HOST)
 +  set(binpac_SRCS
 +      ${BISON_PACParser_INPUT}
@@ -182,92 +194,74 @@ diff -aur bro-2.3.1/aux/binpac/src/CMakeLists.txt bro-2.3.1-1/aux/binpac/src/CMa
 +      pac_varfield.h
 +      pac_withinput.h
 +  )
- 
--add_executable(binpac ${binpac_SRCS})
++
 +  add_executable(binpac ${binpac_SRCS})
- 
--if (NOT BinPAC_SKIP_INSTALL)
--    install(TARGETS binpac DESTINATION bin)
--endif ()
++
 +  if (NOT BinPAC_SKIP_INSTALL)
 +      install(TARGETS binpac DESTINATION bin)
 +  endif ()
- 
--# This is set to assist superprojects that want to build BinPac
--# from source and rely on it as a target
--set(BinPAC_EXE binpac
--    CACHE STRING "BinPAC executable" FORCE)
++
 +  # This is set to assist superprojects that want to build BinPac
 +  # from source and rely on it as a target
 +  set(BinPAC_EXE binpac
 +      CACHE STRING "BinPAC executable" FORCE)
++
 +else()
-+  set(BinPAC_EXE ${BINPAC_HOST}
++    set(BinPAC_EXE ${BINPAC_HOST}
 +      CACHE STRING "BinPAC executable" FORCE)
 +endif()
-diff -aur bro-2.3.1/cmake/BifCl.cmake bro-2.3.1-1/cmake/BifCl.cmake
---- bro-2.3.1/cmake/BifCl.cmake	2014-09-08 08:24:09.000000000 -0700
-+++ bro-2.3.1-1/cmake/BifCl.cmake	2014-09-19 19:00:08.501155804 -0700
-@@ -68,21 +68,39 @@
- 
+Only in bro-2.4.1-mod/aux/binpac/src: CMakeLists.txt~
+diff -ru bro-2.4.1/cmake/BifCl.cmake bro-2.4.1-mod/cmake/BifCl.cmake
+--- bro-2.4.1/cmake/BifCl.cmake	2015-09-06 15:44:03.000000000 -0400
++++ bro-2.4.1-mod/cmake/BifCl.cmake	2016-03-08 22:57:06.703129978 -0500
+@@ -98,17 +98,31 @@
+         set(BifCl_EXE "${BRO_PLUGIN_BRO_BUILD}/src/bifcl")
      endif ()
  
--    add_custom_command(OUTPUT ${bifOutputs}
--                       COMMAND bifcl
+-    add_custom_command(OUTPUT ${bifOutputs} ${BIF_OUTPUT_BRO}
+-                       COMMAND ${BifCl_EXE}
 -                       ARGS ${bifcl_args} ${CMAKE_CURRENT_SOURCE_DIR}/${bifInput} || (rm -f ${bifOutputs} && exit 1)
--                       # In order be able to run bro from the build directory,
--                       # the generated bro script needs to be inside a
--                       # a directory tree named the same way it will be
--                       # referenced from an @load.
 -                       COMMAND "${CMAKE_COMMAND}"
--                       ARGS -E copy ${bifInput}.bro ${BIF_OUTPUT_BRO}
+-                       ARGS -E copy ${bifInputBasename}.bro ${BIF_OUTPUT_BRO}
 -                       COMMAND "${CMAKE_COMMAND}"
--                       ARGS -E remove -f ${bifInput}.bro
+-                       ARGS -E remove -f ${bifInputBasename}.bro
 -                       DEPENDS ${bifInput}
--                       DEPENDS bifcl
+-                       DEPENDS ${bifclDep}
 -                       COMMENT "[BIFCL] Processing ${bifInput}"
 -    )
 +    if(NOT DEFINED BIFCL_HOST)
-+      add_custom_command(OUTPUT ${bifOutputs}
-+                         COMMAND bifcl
-+                         ARGS ${bifcl_args} ${CMAKE_CURRENT_SOURCE_DIR}/${bifInput} || (rm -f ${bifOutputs} && exit 1)
-+                         # In order be able to run bro from the build directory,
-+                         # the generated bro script needs to be inside a
-+                         # a directory tree named the same way it will be
-+                         # referenced from an @load.
-+                         COMMAND "${CMAKE_COMMAND}"
-+                         ARGS -E copy ${bifInput}.bro ${BIF_OUTPUT_BRO}
-+                         COMMAND "${CMAKE_COMMAND}"
-+                         ARGS -E remove -f ${bifInput}.bro
-+                         DEPENDS ${bifInput}
-+                         DEPENDS bifcl
-+                         COMMENT "[BIFCL] Processing ${bifInput}"
-+      )
++      add_custom_command(OUTPUT ${bifOutputs} ${BIF_OUTPUT_BRO}
++			 COMMAND ${BifCl_EXE}
++			 ARGS ${bifcl_args} ${CMAKE_CURRENT_SOURCE_DIR}/${bifInput} || (rm -f ${bifOutputs} && exit 1)
++			 COMMAND "${CMAKE_COMMAND}"
++			 ARGS -E copy ${bifInputBasename}.bro ${BIF_OUTPUT_BRO}
++			 COMMAND "${CMAKE_COMMAND}"
++			 ARGS -E remove -f ${bifInputBasename}.bro
++			 DEPENDS ${bifInput}
++			 DEPENDS ${bifclDep}
++			 COMMENT "[BIFCL] Processing ${bifInput}"
++			 )
 +    else()
-+      add_custom_command(OUTPUT ${bifOutputs}
-+                         COMMAND "${BIFCL_HOST}"
-+                         ARGS ${bifcl_args} ${CMAKE_CURRENT_SOURCE_DIR}/${bifInput} || (rm -f ${bifOutputs} && exit 1)
-+                         # In order be able to run bro from the build directory,
-+                         # the generated bro script needs to be inside a
-+                         # a directory tree named the same way it will be
-+                         # referenced from an @load.
-+                         COMMAND "${CMAKE_COMMAND}"
-+                         ARGS -E copy ${bifInput}.bro ${BIF_OUTPUT_BRO}
-+                         COMMAND "${CMAKE_COMMAND}"
-+                         ARGS -E remove -f ${bifInput}.bro
-+                         DEPENDS ${bifInput}
-+                         DEPENDS bifcl
-+                         COMMENT "[BIFCL] Processing ${bifInput}"
-+      )
-+    endif()
++      add_custom_command(OUTPUT ${bifOutputs} ${BIF_OUTPUT_BRO}
++			 COMMAND "${BIFCL_HOST}"
++			 ARGS ${bifcl_args} ${CMAKE_CURRENT_SOURCE_DIR}/${bifInput} || (rm -f ${bifOutputs} && exit 1)
++			 COMMAND "${CMAKE_COMMAND}"
++			 ARGS -E copy ${bifInputBasename}.bro ${BIF_OUTPUT_BRO}
++			 COMMAND "${CMAKE_COMMAND}"
++			 ARGS -E remove -f ${bifInputBasename}.bro
++			 DEPENDS ${bifInput}
++			 DEPENDS ${bifclDep}
++			 COMMENT "[BIFCL] Processing ${bifInput}"
++			 )
++    endif()		       
  
      string(REGEX REPLACE "${CMAKE_BINARY_DIR}/src/" "" target "${target}")
      string(REGEX REPLACE "/" "-" target "${target}")
-Only in bro-2.3.1-1/cmake: .BifCl.cmake.swp
-diff -aur bro-2.3.1/src/CMakeLists.txt bro-2.3.1-1/src/CMakeLists.txt
---- bro-2.3.1/src/CMakeLists.txt	2014-09-08 08:23:47.000000000 -0700
-+++ bro-2.3.1-1/src/CMakeLists.txt	2014-09-19 18:48:47.511082456 -0700
-@@ -95,20 +95,24 @@
+Only in bro-2.4.1-mod/cmake: BifCl.cmake~
+diff -ru bro-2.4.1/src/CMakeLists.txt bro-2.4.1-mod/src/CMakeLists.txt
+--- bro-2.4.1/src/CMakeLists.txt	2015-09-06 15:43:16.000000000 -0400
++++ bro-2.4.1-mod/src/CMakeLists.txt	2016-03-08 22:55:51.908874248 -0500
+@@ -96,20 +96,24 @@
  ########################################################################
  ## bifcl (BIF compiler) target
  
@@ -304,3 +298,4 @@ diff -aur bro-2.3.1/src/CMakeLists.txt bro-2.3.1-1/src/CMakeLists.txt
  
  ########################################################################
  ## bifcl-dependent targets
+Only in bro-2.4.1-mod/src: CMakeLists.txt~
