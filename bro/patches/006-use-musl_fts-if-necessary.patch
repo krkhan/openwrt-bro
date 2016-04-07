@@ -1,0 +1,48 @@
+diff -ruN bro-2.4.1/cmake/FindFTS.cmake bro-2.4.1-mod/cmake/FindFTS.cmake
+--- bro-2.4.1/cmake/FindFTS.cmake	1969-12-31 19:00:00.000000000 -0500
++++ bro-2.4.1-mod/cmake/FindFTS.cmake	2016-04-03 22:13:51.095093143 -0400
+@@ -0,0 +1,24 @@
++# - Try to find out how to use the fts functions
++#
++# Usage of this module as follows:
++#
++#     find_package(FTS)
++#
++# Then you get to use FTS_LIBRARY, which will either be empty, or
++# set to the name of a library which provides the fts_open function.
++#
++# thanks https://opensource.apple.com/source/curl/curl-57.2/curl/CMakeLists.txt
++#        https://cmake.org/pipermail/cmake/2008-October/024389.html
++include(CheckLibraryExists)
++check_library_exists("c" fts_open "" NOT_NEED_FTS_LIB)
++if(NOT_NEED_FTS_LIB)
++  set(FTS_LIBRARY)
++else()
++  check_library_exists("fts" fts_open "" NEED_FTS_LIB_FTS)
++  if(NEED_FTS_LIB_FTS)
++    set(FTS_LIBRARY "fts")
++  else()
++    # something went wrong
++    message(FATAL_ERROR "could not find a library that provides the fts_open function")
++  endif()
++endif()
+diff -ruN bro-2.4.1/CMakeLists.txt bro-2.4.1-mod/CMakeLists.txt
+--- bro-2.4.1/CMakeLists.txt	2015-09-06 15:43:16.000000000 -0400
++++ bro-2.4.1-mod/CMakeLists.txt	2016-04-06 21:09:11.069834100 -0400
+@@ -138,6 +138,8 @@
+     # perftools weren't found
+ endif ()
+ 
++find_package(FTS)
++
+ set(brodeps
+     ${BinPAC_LIBRARY}
+     ${PCAP_LIBRARY}
+@@ -145,6 +147,7 @@
+     ${BIND_LIBRARY}
+     ${ZLIB_LIBRARY}
+     ${JEMALLOC_LIBRARIES}
++    ${FTS_LIBRARY}
+     ${OPTLIBS}
+ )
+ 
