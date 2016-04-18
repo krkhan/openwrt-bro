@@ -1,36 +1,106 @@
---- a/Makefile.org
-+++ b/Makefile.org
-@@ -274,17 +274,17 @@ build_all: build_libs build_apps build_t
- build_libs: build_crypto build_ssl build_engines
+diff -ru openssl-1.0.2g/crypto/Makefile openssl-1.0.2g-mod/crypto/Makefile
+--- openssl-1.0.2g/crypto/Makefile	2016-03-01 08:36:40.000000000 -0500
++++ openssl-1.0.2g-mod/crypto/Makefile	2016-04-17 22:46:45.549857895 -0400
+@@ -85,11 +85,11 @@
+ 	@if [ -z "$(THIS)" ]; then $(MAKE) -f $(TOP)/Makefile reflect THIS=$@; fi
+ 
+ subdirs:
+-	@target=all; $(RECURSIVE_MAKE)
++	+@target=all; $(RECURSIVE_MAKE)
+ 
+ files:
+ 	$(PERL) $(TOP)/util/files.pl "CPUID_OBJ=$(CPUID_OBJ)" Makefile >> $(TOP)/MINFO
+-	@target=files; $(RECURSIVE_MAKE)
++	+@target=files; $(RECURSIVE_MAKE)
+ 
+ links:
+ 	@$(PERL) $(TOP)/util/mklink.pl ../include/openssl $(EXHEADER)
+@@ -100,7 +100,7 @@
+ # lib: $(LIB): are splitted to avoid end-less loop
+ lib:	$(LIB)
+ 	@touch lib
+-$(LIB):	$(LIBOBJ)
++$(LIB):	$(LIBOBJ) | subdirs
+ 	$(AR) $(LIB) $(LIBOBJ)
+ 	test -z "$(FIPSLIBDIR)" || $(AR) $(LIB) $(FIPSLIBDIR)fipscanister.o
+ 	$(RANLIB) $(LIB) || echo Never mind.
+@@ -111,7 +111,7 @@
+ 	fi
+ 
+ libs:
+-	@target=lib; $(RECURSIVE_MAKE)
++	+@target=lib; $(RECURSIVE_MAKE)
+ 
+ install:
+ 	@[ -n "$(INSTALLTOP)" ] # should be set by top Makefile...
+@@ -120,7 +120,7 @@
+ 	(cp $$i $(INSTALL_PREFIX)$(INSTALLTOP)/include/openssl/$$i; \
+ 	chmod 644 $(INSTALL_PREFIX)$(INSTALLTOP)/include/openssl/$$i ); \
+ 	done;
+-	@target=install; $(RECURSIVE_MAKE)
++	+@target=install; $(RECURSIVE_MAKE)
+ 
+ lint:
+ 	@target=lint; $(RECURSIVE_MAKE)
+diff -ru openssl-1.0.2g/engines/Makefile openssl-1.0.2g-mod/engines/Makefile
+--- openssl-1.0.2g/engines/Makefile	2016-03-01 08:36:51.000000000 -0500
++++ openssl-1.0.2g-mod/engines/Makefile	2016-04-17 22:46:45.549857895 -0400
+@@ -72,7 +72,7 @@
+ 
+ all:	lib subdirs
+ 
+-lib:	$(LIBOBJ)
++lib:	$(LIBOBJ) | subdirs
+ 	@if [ -n "$(SHARED_LIBS)" ]; then \
+ 		set -e; \
+ 		for l in $(LIBNAMES); do \
+@@ -89,7 +89,7 @@
+ 
+ subdirs:
+ 	echo $(EDIRS)
+-	@target=all; $(RECURSIVE_MAKE)
++	+@target=all; $(RECURSIVE_MAKE)
+ 
+ files:
+ 	$(PERL) $(TOP)/util/files.pl Makefile >> $(TOP)/MINFO
+@@ -128,7 +128,7 @@
+ 			  mv -f $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/engines/$$pfx$$l$$sfx.new $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/engines/$$pfx$$l$$sfx ); \
+ 		done; \
+ 	fi
+-	@target=install; $(RECURSIVE_MAKE)
++	+@target=install; $(RECURSIVE_MAKE)
+ 
+ tags:
+ 	ctags $(SRC)
+diff -ru openssl-1.0.2g/Makefile.org openssl-1.0.2g-mod/Makefile.org
+--- openssl-1.0.2g/Makefile.org	2016-04-17 22:46:03.609856787 -0400
++++ openssl-1.0.2g-mod/Makefile.org	2016-04-17 22:47:39.805859327 -0400
+@@ -279,17 +279,17 @@
+ build_libssl: build_ssl libssl.pc
  
  build_crypto:
 -	@dir=crypto; target=all; $(BUILD_ONE_CMD)
--build_ssl:
--	@dir=ssl; target=all; $(BUILD_ONE_CMD)
--build_engines:
--	@dir=engines; target=all; $(BUILD_ONE_CMD)
--build_apps:
--	@dir=apps; target=all; $(BUILD_ONE_CMD)
--build_tests:
--	@dir=test; target=all; $(BUILD_ONE_CMD)
--build_tools:
--	@dir=tools; target=all; $(BUILD_ONE_CMD)
 +	+@dir=crypto; target=all; $(BUILD_ONE_CMD)
-+build_ssl: build_crypto
+ build_ssl: build_crypto
+-	@dir=ssl; target=all; $(BUILD_ONE_CMD)
 +	+@dir=ssl; target=all; $(BUILD_ONE_CMD)
-+build_engines: build_crypto
+ build_engines: build_crypto
+-	@dir=engines; target=all; $(BUILD_ONE_CMD)
 +	+@dir=engines; target=all; $(BUILD_ONE_CMD)
-+build_apps: build_libs
+ build_apps: build_libs
+-	@dir=apps; target=all; $(BUILD_ONE_CMD)
 +	+@dir=apps; target=all; $(BUILD_ONE_CMD)
-+build_tests: build_libs
+ build_tests: build_libs
+-	@dir=test; target=all; $(BUILD_ONE_CMD)
 +	+@dir=test; target=all; $(BUILD_ONE_CMD)
-+build_tools: build_libs
+ build_tools: build_libs
+-	@dir=tools; target=all; $(BUILD_ONE_CMD)
 +	+@dir=tools; target=all; $(BUILD_ONE_CMD)
  
  all_testapps: build_libs build_testapps
  build_testapps:
-@@ -453,7 +453,7 @@ report:
- 	@$(PERL) util/selftest.pl
+@@ -461,7 +461,7 @@
+ 	@set -e; target=update; $(RECURSIVE_BUILD_CMD)
  
  depend:
 -	@set -e; target=depend; $(RECURSIVE_BUILD_CMD)
@@ -38,9 +108,9 @@
  
  lint:
  	@set -e; target=lint; $(RECURSIVE_BUILD_CMD)
-@@ -531,9 +531,9 @@ dist:
- dist_pem_h:
- 	(cd crypto/pem; $(MAKE) -e $(BUILDENV) pem.h; $(MAKE) clean)
+@@ -523,9 +523,9 @@
+ 	@$(MAKE) SDIRS='$(SDIRS)' clean
+ 	@$(MAKE) TAR='$(TAR)' TARFLAGS='$(TARFLAGS)' $(DISTTARVARS) tar
  
 -install: all install_sw
 +install: install_sw
@@ -50,7 +120,7 @@
  	@$(PERL) $(TOP)/util/mkdir-p.pl $(INSTALL_PREFIX)$(INSTALLTOP)/bin \
  		$(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR) \
  		$(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/engines \
-@@ -542,12 +542,19 @@ install_sw:
+@@ -534,12 +534,19 @@
  		$(INSTALL_PREFIX)$(OPENSSLDIR)/misc \
  		$(INSTALL_PREFIX)$(OPENSSLDIR)/certs \
  		$(INSTALL_PREFIX)$(OPENSSLDIR)/private
@@ -71,7 +141,7 @@
  	@set -e; liblist="$(LIBS)"; for i in $$liblist ;\
  	do \
  		if [ -f "$$i" ]; then \
-@@ -631,12 +638,7 @@ install_html_docs:
+@@ -623,12 +630,7 @@
  		done; \
  	done
  
@@ -85,9 +155,11 @@
  	@pod2man="`cd ./util; ./pod2mantest $(PERL)`"; \
  	here="`pwd`"; \
  	filecase=; \
---- a/Makefile.shared
-+++ b/Makefile.shared
-@@ -120,6 +120,7 @@ SYMLINK_SO=	\
+Only in openssl-1.0.2g-mod: Makefile.org.orig
+diff -ru openssl-1.0.2g/Makefile.shared openssl-1.0.2g-mod/Makefile.shared
+--- openssl-1.0.2g/Makefile.shared	2016-04-17 22:42:43.201851496 -0400
++++ openssl-1.0.2g-mod/Makefile.shared	2016-04-17 22:46:45.549857895 -0400
+@@ -120,6 +120,7 @@
  			done; \
  		fi; \
  		if [ -n "$$SHLIB_SOVER" ]; then \
@@ -95,81 +167,10 @@
  			( $(SET_X); rm -f $$SHLIB$$SHLIB_SUFFIX; \
  			  ln -s $$prev $$SHLIB$$SHLIB_SUFFIX ); \
  		fi; \
---- a/crypto/Makefile
-+++ b/crypto/Makefile
-@@ -85,11 +85,11 @@ testapps:
- 	@if [ -z "$(THIS)" ]; then $(MAKE) -f $(TOP)/Makefile reflect THIS=$@; fi
- 
- subdirs:
--	@target=all; $(RECURSIVE_MAKE)
-+	+@target=all; $(RECURSIVE_MAKE)
- 
- files:
- 	$(PERL) $(TOP)/util/files.pl "CPUID_OBJ=$(CPUID_OBJ)" Makefile >> $(TOP)/MINFO
--	@target=files; $(RECURSIVE_MAKE)
-+	+@target=files; $(RECURSIVE_MAKE)
- 
- links:
- 	@$(PERL) $(TOP)/util/mklink.pl ../include/openssl $(EXHEADER)
-@@ -100,7 +100,7 @@ links:
- # lib: $(LIB): are splitted to avoid end-less loop
- lib:	$(LIB)
- 	@touch lib
--$(LIB):	$(LIBOBJ)
-+$(LIB):	$(LIBOBJ) | subdirs
- 	$(AR) $(LIB) $(LIBOBJ)
- 	test -z "$(FIPSLIBDIR)" || $(AR) $(LIB) $(FIPSLIBDIR)fipscanister.o
- 	$(RANLIB) $(LIB) || echo Never mind.
-@@ -111,7 +111,7 @@ shared: buildinf.h lib subdirs
- 	fi
- 
- libs:
--	@target=lib; $(RECURSIVE_MAKE)
-+	+@target=lib; $(RECURSIVE_MAKE)
- 
- install:
- 	@[ -n "$(INSTALLTOP)" ] # should be set by top Makefile...
-@@ -120,7 +120,7 @@ install:
- 	(cp $$i $(INSTALL_PREFIX)$(INSTALLTOP)/include/openssl/$$i; \
- 	chmod 644 $(INSTALL_PREFIX)$(INSTALLTOP)/include/openssl/$$i ); \
- 	done;
--	@target=install; $(RECURSIVE_MAKE)
-+	+@target=install; $(RECURSIVE_MAKE)
- 
- lint:
- 	@target=lint; $(RECURSIVE_MAKE)
---- a/engines/Makefile
-+++ b/engines/Makefile
-@@ -72,7 +72,7 @@ top:
- 
- all:	lib subdirs
- 
--lib:	$(LIBOBJ)
-+lib:	$(LIBOBJ) | subdirs
- 	@if [ -n "$(SHARED_LIBS)" ]; then \
- 		set -e; \
- 		for l in $(LIBNAMES); do \
-@@ -89,7 +89,7 @@ lib:	$(LIBOBJ)
- 
- subdirs:
- 	echo $(EDIRS)
--	@target=all; $(RECURSIVE_MAKE)
-+	+@target=all; $(RECURSIVE_MAKE)
- 
- files:
- 	$(PERL) $(TOP)/util/files.pl Makefile >> $(TOP)/MINFO
-@@ -128,7 +128,7 @@ install:
- 			  mv -f $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/engines/$$pfx$$l$$sfx.new $(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/engines/$$pfx$$l$$sfx ); \
- 		done; \
- 	fi
--	@target=install; $(RECURSIVE_MAKE)
-+	+@target=install; $(RECURSIVE_MAKE)
- 
- tags:
- 	ctags $(SRC)
---- a/test/Makefile
-+++ b/test/Makefile
-@@ -133,7 +133,7 @@ install:
+diff -ru openssl-1.0.2g/test/Makefile openssl-1.0.2g-mod/test/Makefile
+--- openssl-1.0.2g/test/Makefile	2016-03-01 08:36:53.000000000 -0500
++++ openssl-1.0.2g-mod/test/Makefile	2016-04-17 22:46:45.549857895 -0400
+@@ -139,7 +139,7 @@
  tags:
  	ctags $(SRC)
  
@@ -178,7 +179,7 @@
  
  apps:
  	@(cd ..; $(MAKE) DIRS=apps all)
-@@ -529,7 +529,7 @@ $(CONSTTIMETEST)$(EXE_EXT): $(CONSTTIMET
+@@ -557,7 +557,7 @@
  #	fi
  
  dummytest$(EXE_EXT): dummytest.o $(DLIBCRYPTO)
@@ -187,3 +188,4 @@
  
  # DO NOT DELETE THIS LINE -- make depend depends on it.
  
+Only in openssl-1.0.2g-mod/test: Makefile.orig

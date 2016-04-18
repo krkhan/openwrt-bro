@@ -1,6 +1,7 @@
---- a/Makefile
-+++ b/Makefile
-@@ -138,7 +138,7 @@ FIPSCANLIB=
+diff -ru openssl-1.0.2g/Makefile openssl-1.0.2g-mod/Makefile
+--- openssl-1.0.2g/Makefile	2016-03-01 08:36:55.000000000 -0500
++++ openssl-1.0.2g-mod/Makefile	2016-04-17 22:40:41.189848275 -0400
+@@ -138,7 +138,7 @@
  
  BASEADDR=0xFB00000
  
@@ -9,7 +10,7 @@
  ENGDIRS= ccgost
  SHLIBDIRS= crypto ssl
  
-@@ -156,7 +156,7 @@ SDIRS=  \
+@@ -156,7 +156,7 @@
  
  # tests to perform.  "alltests" is a special word indicating that all tests
  # should be performed.
@@ -18,7 +19,7 @@
  
  MAKEFILE= Makefile
  
-@@ -170,7 +170,7 @@ SHELL=/bin/sh
+@@ -170,7 +170,7 @@
  
  TOP=    .
  ONEDIRS=out tmp
@@ -27,29 +28,31 @@
  WDIRS=  windows
  LIBS=   libcrypto.a libssl.a
  SHARED_CRYPTO=libcrypto$(SHLIB_EXT)
-@@ -271,7 +271,7 @@ reflect:
- 	@[ -n "$(THIS)" ] && $(CLEARENV) && $(MAKE) $(THIS) -e $(BUILDENV)
+@@ -273,7 +273,7 @@
  
  sub_all: build_all
+ 
 -build_all: build_libs build_apps build_tests build_tools
 +build_all: build_libs build_apps build_tools
  
- build_libs: build_crypto build_ssl build_engines
+ build_libs: build_libcrypto build_libssl openssl.pc
  
-@@ -538,7 +538,7 @@ dist:
- dist_pem_h:
- 	(cd crypto/pem; $(MAKE) -e $(BUILDENV) pem.h; $(MAKE) clean)
+@@ -530,7 +530,7 @@
+ 	@$(MAKE) SDIRS='$(SDIRS)' clean
+ 	@$(MAKE) TAR='$(TAR)' TARFLAGS='$(TARFLAGS)' $(DISTTARVARS) tar
  
 -install: all install_docs install_sw
 +install: all install_sw
  
  install_sw:
  	@$(PERL) $(TOP)/util/mkdir-p.pl $(INSTALL_PREFIX)$(INSTALLTOP)/bin \
---- a/Makefile.org
-+++ b/Makefile.org
-@@ -536,7 +536,7 @@ dist:
- dist_pem_h:
- 	(cd crypto/pem; $(MAKE) -e $(BUILDENV) pem.h; $(MAKE) clean)
+Only in openssl-1.0.2g-mod: Makefile~
+diff -ru openssl-1.0.2g/Makefile.org openssl-1.0.2g-mod/Makefile.org
+--- openssl-1.0.2g/Makefile.org	2016-04-17 22:38:48.777845307 -0400
++++ openssl-1.0.2g-mod/Makefile.org	2016-04-17 22:40:04.209847298 -0400
+@@ -528,7 +528,7 @@
+ 	@$(MAKE) SDIRS='$(SDIRS)' clean
+ 	@$(MAKE) TAR='$(TAR)' TARFLAGS='$(TARFLAGS)' $(DISTTARVARS) tar
  
 -install: all install_docs install_sw
 +install: all install_sw
